@@ -1,13 +1,14 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
+import '../styles/confirmation.css';
 
 const ConfirmationPage = () => {
   const formData = useSelector((state) => state.form.formData);
 
-  if (!formData) return <p>No data submitted!</p>;
+  if (!formData) return <p className="no-data">No data submitted!</p>;
 
   return (
-    <div>
+    <div className="confirmation-container">
       <h1>Confirmation</h1>
       <p>
         <strong>Full Name:</strong> {formData.fullName}
@@ -27,6 +28,7 @@ const ConfirmationPage = () => {
           <li key={index}>{step}</li>
         ))}
       </ul>
+      <button>Submit</button>
     </div>
   );
 };

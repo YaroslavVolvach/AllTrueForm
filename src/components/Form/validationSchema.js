@@ -5,5 +5,7 @@ export const supportRequestSchema = z.object({
   email: z.string().email('Invalid email address'),
   issueType: z.string().min(1, 'Please select an issue type'),
   tags: z.array(z.string()).min(1, 'Please select at least one tag'),
-  steps: z.array(z.string().min(1, 'Step description is required')),
+  steps: z
+    .array(z.string().min(1, 'Step description is required'))
+    .min(1, 'At least one step is required'),
 });

@@ -5,6 +5,8 @@ import { supportRequestSchema } from './validationSchema';
 import { useDispatch } from 'react-redux';
 import { saveFormData } from '../../redux/slices/formSlice';
 import { useNavigate } from 'react-router-dom';
+import { FaPlus, FaTimes } from 'react-icons/fa';
+import '../../styles/form.css';
 
 const SupportRequestForm = () => {
   const {
@@ -12,6 +14,7 @@ const SupportRequestForm = () => {
     handleSubmit,
     control,
     formState: { errors },
+    watch,
   } = useForm({
     resolver: zodResolver(supportRequestSchema),
     defaultValues: {
@@ -36,26 +39,31 @@ const SupportRequestForm = () => {
     navigate('/confirmation');
   };
 
+  const steps = watch('steps');
+
+  const handleAddStep = () => {
+    append('');
+  };
+
+  const isLastStepFilled = steps[steps.length - 1] !== '';
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {/* Full Name Field */}
       <div>
-        <label>Full Name</label>
-        <input {...register('fullName')} />
+        <label htmlFor="fullName">Full Name</label>
+        <input id="fullName" {...register('fullName')} />
         {errors.fullName && <p>{errors.fullName.message}</p>}
       </div>
 
-      {/* Email Address Field */}
       <div>
-        <label>Email Address</label>
-        <input type="email" {...register('email')} />
+        <label htmlFor="email">Email Address</label>
+        <input id="email" type="email" {...register('email')} />
         {errors.email && <p>{errors.email.message}</p>}
       </div>
 
-      {/* Issue Type Dropdown */}
       <div>
-        <label>Issue Type</label>
-        <select {...register('issueType')}>
+        <label htmlFor="issueType">Issue Type</label>
+        <select id="issueType" {...register('issueType')}>
           <option value="">Select Issue Type</option>
           <option value="bug">Bug Report</option>
           <option value="feature">Feature Request</option>
@@ -64,10 +72,9 @@ const SupportRequestForm = () => {
         {errors.issueType && <p>{errors.issueType.message}</p>}
       </div>
 
-      {/* Tags Multi-Select */}
       <div>
-        <label>Tags</label>
-        <select {...register('tags')} multiple>
+        <label htmlFor="tags">Tags</label>
+        <select id="tags" {...register('tags')} multiple>
           <option value="UI">UI</option>
           <option value="Backend">Backend</option>
           <option value="Performance">Performance</option>
@@ -75,27 +82,46 @@ const SupportRequestForm = () => {
         {errors.tags && <p>{errors.tags.message}</p>}
       </div>
 
-      {/* Steps to Reproduce Dynamic Field */}
-      <div>
-        <label>Steps to Reproduce</label>
-        {fields.map((field, index) => (
-          <div key={field.id}>
+      <div className="steps-container">
+        <label htmlFor="steps">Steps to Reproduce</label>
+
+        <div className="step-item">
+          <input id="Step 1" {...register('steps.0')} placeholder="Step 1" />
+          {errors.steps?.[0] && <p>{errors.steps[0].message}</p>}
+        </div>
+
+        {fields.slice(1).map((field, index) => (
+          <div key={field.id} className="step-item">
             <input
-              {...register(`steps.${index}`)}
-              placeholder={`Step ${index + 1}`}
+              id={`steps-${index + 1}`}
+              {...register(`steps.${index + 1}`)}
+              placeholder={`Step ${index + 2}`}
             />
-            {errors.steps?.[index] && <p>{errors.steps[index].message}</p>}
-            <button type="button" onClick={() => remove(index)}>
-              Remove
+            {errors.steps?.[index + 1] && (
+              <p>{errors.steps[index + 1].message}</p>
+            )}
+            <button
+              type="button"
+              onClick={() => remove(index + 1)}
+              className="remove-btn"
+            >
+              <FaTimes />
             </button>
           </div>
         ))}
-        <button type="button" onClick={() => append('')}>
-          Add Step
-        </button>
+
+        {isLastStepFilled && (
+          <button
+            type="button"
+            onClick={handleAddStep}
+            className="plus-btn"
+            data-testid="button"
+          >
+            <FaPlus />
+          </button>
+        )}
       </div>
 
-      {/* Submit Button */}
       <button type="submit">Submit</button>
     </form>
   );
