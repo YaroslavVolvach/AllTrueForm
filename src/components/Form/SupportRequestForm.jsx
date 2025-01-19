@@ -1,24 +1,39 @@
 import React from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { supportRequestSchema } from './validationSchema';
+import { useDispatch } from 'react-redux';
+import { saveFormData } from '../../redux/slices/formSlice';
+import { useNavigate } from 'react-router-dom';
 
 const SupportRequestForm = () => {
-  const { register, handleSubmit, control, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(supportRequestSchema),
     defaultValues: {
       fullName: '',
       email: '',
       issueType: '',
       tags: [],
-      steps: [''], // Default to one step
+      steps: [''],
     },
   });
 
   const { fields, append, remove } = useFieldArray({
     control,
-    name: 'steps', // Dynamic steps field
+    name: 'steps',
   });
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const onSubmit = (data) => {
-    console.log(data); // Replace with Redux dispatch later
+    dispatch(saveFormData(data));
+    navigate('/confirmation');
   };
 
   return (
@@ -26,27 +41,21 @@ const SupportRequestForm = () => {
       {/* Full Name Field */}
       <div>
         <label>Full Name</label>
-        <input {...register('fullName', { required: 'Full Name is required' })} />
+        <input {...register('fullName')} />
         {errors.fullName && <p>{errors.fullName.message}</p>}
       </div>
 
-      {/* Email Field */}
+      {/* Email Address Field */}
       <div>
-        <label>Email</label>
-        <input
-          type="email"
-          {...register('email', { 
-            required: 'Email is required', 
-            pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email address' }
-          })}
-        />
+        <label>Email Address</label>
+        <input type="email" {...register('email')} />
         {errors.email && <p>{errors.email.message}</p>}
       </div>
 
       {/* Issue Type Dropdown */}
       <div>
         <label>Issue Type</label>
-        <select {...register('issueType', { required: 'Please select an issue type' })}>
+        <select {...register('issueType')}>
           <option value="">Select Issue Type</option>
           <option value="bug">Bug Report</option>
           <option value="feature">Feature Request</option>
@@ -63,24 +72,30 @@ const SupportRequestForm = () => {
           <option value="Backend">Backend</option>
           <option value="Performance">Performance</option>
         </select>
+        {errors.tags && <p>{errors.tags.message}</p>}
       </div>
 
-      {/* Steps to Reproduce */}
+      {/* Steps to Reproduce Dynamic Field */}
       <div>
         <label>Steps to Reproduce</label>
-        {fields.map((item, index) => (
-          <div key={item.id}>
+        {fields.map((field, index) => (
+          <div key={field.id}>
             <input
-              {...register(`steps.${index}`, { required: 'Step description is required' })}
+              {...register(`steps.${index}`)}
               placeholder={`Step ${index + 1}`}
             />
             {errors.steps?.[index] && <p>{errors.steps[index].message}</p>}
-            <button type="button" onClick={() => remove(index)}>Remove</button>
+            <button type="button" onClick={() => remove(index)}>
+              Remove
+            </button>
           </div>
         ))}
-        <button type="button" onClick={() => append('')}>Add Step</button>
+        <button type="button" onClick={() => append('')}>
+          Add Step
+        </button>
       </div>
 
+      {/* Submit Button */}
       <button type="submit">Submit</button>
     </form>
   );
