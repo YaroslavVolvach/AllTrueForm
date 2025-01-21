@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { saveFormData } from '../../redux/slices/formSlice';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTimes } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 import '../../styles/form.css';
 
 const SupportRequestForm = () => {
@@ -33,6 +34,7 @@ const SupportRequestForm = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const token = useSelector((state) => state.auth.token);
 
   const onSubmit = (data) => {
     dispatch(saveFormData(data));
@@ -122,7 +124,9 @@ const SupportRequestForm = () => {
         )}
       </div>
 
-      <button type="submit">Submit</button>
+      <button type="submit" disabled={!token}>
+        {token ? 'Submit' : 'You must be logged in to submit'}
+      </button>
     </form>
   );
 };

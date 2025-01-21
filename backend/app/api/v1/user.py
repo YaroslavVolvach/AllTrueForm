@@ -8,7 +8,7 @@ from app.dependencies import role_required
 
 router = APIRouter()
 
-@router.post("/register", response_model=schemas.User)
+@router.post("/registration", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
