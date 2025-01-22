@@ -1,64 +1,77 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  user: null,
+  user: {
+    fullName: localStorage.getItem('fullName') || null,
+    email: localStorage.getItem('email') || null,
+  },
   token: localStorage.getItem('token') || null,
   isLoading: false,
   isError: false,
   errorMessage: '',
 };
 
-const saveTokenToLocalStorage = (token) => {
-  localStorage.setItem('token', token);
+const saveToLocalStorage = (key, value) => {
+  localStorage.setItem(key, value);
 };
 
-const removeTokenFromLocalStorage = () => {
-  localStorage.removeItem('token');
+const removeFromLocalStorage = (key) => {
+  localStorage.removeItem(key);
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    registerStart: (state) => {
+    loginStart: (state) => {
       state.isLoading = true;
       state.isError = false;
       state.errorMessage = '';
     },
-    registerSuccess: (state, action) => {
+    loginSuccess: (state, action) => {
+      const { token, fullName, email } = action.payload;
+
       state.isLoading = false;
-      state.user = action.payload.user;
-      state.token = action.payload.token;
-      saveTokenToLocalStorage(state.token);
+      state.token = token;
+      state.user.fullName = fullName;
+      state.user.email = email;
+
+      saveToLocalStorage('token', token);
+      saveToLocalStorage('fullName', fullName);
+      saveToLocalStorage('email', email);
     },
-    registerFailure: (state, action) => {
+    loginFailure: (state, action) => {
       state.isLoading = false;
       state.isError = true;
       state.errorMessage = action.payload;
     },
     logout: (state) => {
-      state.user = null;
+      state.user.fullName = null;
+      state.user.email = null;
       state.token = null;
       state.isLoading = false;
       state.isError = false;
       state.errorMessage = '';
-      removeTokenFromLocalStorage();
+
+      removeFromLocalStorage('token');
+      removeFromLocalStorage('fullName');
+      removeFromLocalStorage('email');
     },
     setToken: (state, action) => {
       state.token = action.payload;
-      saveTokenToLocalStorage(action.payload);
+      saveToLocalStorage('token', action.payload);
     },
     removeToken: (state) => {
       state.token = null;
-      removeTokenFromLocalStorage();
+      removeFromLocalStorage('token');
     },
   },
 });
 
 export const {
-  registerStart,
-  registerSuccess,
-  registerFailure,
+  loginStart,
+  loginSuccess,
+  loginFailure,
   logout,
   setToken,
   removeToken,
