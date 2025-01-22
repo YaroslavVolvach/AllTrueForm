@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supportRequestSchema } from './validationSchema';
@@ -7,9 +7,12 @@ import { saveFormData } from '../../redux/slices/formSlice';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTimes } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 import '../../styles/form.css';
 
 const SupportRequestForm = () => {
+  const [tags, setTags] = useState([]);
+
   const {
     register,
     handleSubmit,
@@ -22,7 +25,7 @@ const SupportRequestForm = () => {
       fullName: '',
       email: '',
       issueType: '',
-      tags: [],
+      tagId: '',
       steps: [''],
     },
   });
@@ -36,9 +39,35 @@ const SupportRequestForm = () => {
   const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
 
-  const onSubmit = (data) => {
-    dispatch(saveFormData(data));
-    navigate('/confirmation');
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/v1/tags/', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setTags(response.data);
+      } catch (error) {
+        console.error('Error fetching tags:', error);
+      }
+    };
+
+    fetchTags();
+  }, [token]);
+
+  const onSubmit = async (data) => {
+    try {
+      await axios.post('http://localhost:8000/v1/support_requests', data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(saveFormData(data));
+      navigate('/confirmation');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
   const steps = watch('steps');
@@ -75,13 +104,16 @@ const SupportRequestForm = () => {
       </div>
 
       <div>
-        <label htmlFor="tags">Tags</label>
-        <select id="tags" {...register('tags')} multiple>
-          <option value="UI">UI</option>
-          <option value="Backend">Backend</option>
-          <option value="Performance">Performance</option>
+        <label htmlFor="tagId">Tags</label>
+        <select id="tagId" {...register('tagId')}>
+          <option value="">Select a Tag</option>
+          {tags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {tag.name}
+            </option>
+          ))}
         </select>
-        {errors.tags && <p>{errors.tags.message}</p>}
+        {errors.tagId && <p>{errors.tagId.message}</p>}
       </div>
 
       <div className="steps-container">

@@ -1,20 +1,14 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, Enum
+from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
-from app.db.base import Base
-from app.enums import RequestStatus
-from .support_request_tags import support_request_tags
+from app.database import Base
 
 class SupportRequest(Base):
     __tablename__ = "support_requests"
 
     id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, index=True)
-    email = Column(String, index=True)
-    issue_type = Column(String)
-    status = Column(Enum(RequestStatus), default=RequestStatus.pending)
-    description = Column(Text)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    
-    tags = relationship("Tag", secondary=support_request_tags)
-    user = relationship("User", back_populates="support_requests")
+    full_name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    issue_type = Column(String, nullable=False)
 
+    tag_id = Column(Integer, ForeignKey("tags.id"), nullable=True)
+    tag = relationship("Tag", back_populates="support_requests")
