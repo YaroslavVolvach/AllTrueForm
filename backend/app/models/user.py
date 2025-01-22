@@ -12,4 +12,4 @@ class User(Base):
     hashed_password = Column(String)
     role = Column(Enum(Role), default=Role.user) 
 
-    support_requests = relationship("SupportRequest", back_populates="user")
+    confirmations = relationship("Confirmation", back_populates="user")

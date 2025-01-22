@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship
-from app.database import Base
+from app.db import Base
+from app.models.confirmation import confirmation_tag
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -8,4 +9,8 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
 
-    support_requests = relationship("SupportRequest", back_populates="tag")
+    confirmations = relationship(
+        "Confirmation",
+        secondary=confirmation_tag,
+        back_populates="tags",
+    )

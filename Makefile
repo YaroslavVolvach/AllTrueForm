@@ -92,3 +92,28 @@ rebuild:
 	@$(DOCKER_COMPOSE) down --rmi all
 	@$(DOCKER_COMPOSE) up --build --no-cache -d
 
+
+
+.PHONY: init
+init: ## Build containers, start containers, apply migrations, create tags, and create admin
+	@echo "Building containers..."
+	@docker-compose build --no-cache
+
+	@echo "Starting containers..."
+	@docker-compose up -d
+
+	@echo "Applying migrations..."
+	@if docker-compose exec backend alembic upgrade head; then \
+		echo "Migrations applied successfully."; \
+	else \
+		echo "Migration failed. Aborting."; \
+		exit 1; \
+	fi
+
+	@echo "Creating tags..."
+	@docker-compose exec backend python -c "from app.utils.create_tags import create_tags; create_tags()"
+	@echo "Tags created successfully."
+
+	@echo "Creating admin user..."
+	@docker-compose exec backend python -c "from app.utils.create_admin import create_admin; create_admin()"
+	@echo "Admin user created successfully."

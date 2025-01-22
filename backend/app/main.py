@@ -1,6 +1,6 @@
 from fastapi import FastAPI 
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1.support_request import router as support_request_router
+from app.api.v1.confirmation import router as confirmation_router
 from app.api.v1.tag import router as tag_router
 from app.api.v1.user import router as user_router
 
@@ -14,6 +14,6 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
-app.include_router(support_request_router, prefix="/v1/support-request", tags=["support-request"])
+app.include_router(confirmation_router, prefix="/v1/confirmation", tags=["confirmation"])
 app.include_router(tag_router, prefix="/v1/tags", tags=["tags"])
 app.include_router(user_router, prefix="/v1/users", tags=["users"])

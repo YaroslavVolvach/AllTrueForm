@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supportRequestSchema } from './validationSchema';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { saveFormData } from '../../redux/slices/formSlice';
 import { useNavigate } from 'react-router-dom';
 import { FaPlus, FaTimes } from 'react-icons/fa';
-import { useSelector } from 'react-redux';
 import axios from 'axios';
 import '../../styles/form.css';
 
@@ -16,22 +15,24 @@ const SupportRequestForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const token = useSelector((state) => state.auth.token);
-  const fullName = useSelector((state) => state.auth.user.fullName);
+  const user_id = useSelector((state) => state.auth.user.id);
+  const full_name = useSelector((state) => state.auth.user.full_name);
   const email = useSelector((state) => state.auth.user.email);
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
     watch,
   } = useForm({
     resolver: zodResolver(supportRequestSchema),
     defaultValues: {
-      fullName: fullName || '',
+      full_name: full_name || '',
       email: email || '',
       issueType: '',
-      tagId: '',
+      tagIds: [],
       steps: [''],
     },
   });
@@ -59,13 +60,24 @@ const SupportRequestForm = () => {
   }, [token]);
 
   const onSubmit = async (data) => {
+    data.issue_type = data.issueType;
+
+    delete data.issueType;
+
+    const requestData = {
+      ...data,
+      user_id: parseInt(user_id, 10),
+    };
+
+    console.log('requestData: ', requestData);
+
     try {
-      await axios.post('http://localhost:8000/v1/support_requests', data, {
+      await axios.post('http://localhost:8000/v1/confirmation', requestData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      dispatch(saveFormData(data));
+      dispatch(saveFormData(requestData));
       navigate('/confirmation');
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -80,16 +92,24 @@ const SupportRequestForm = () => {
 
   const isLastStepFilled = steps[steps.length - 1] !== '';
 
+  const handleTagChange = (event) => {
+    const selectedOptions = Array.from(event.target.selectedOptions);
+    const selectedIds = selectedOptions.map((option) =>
+      parseInt(option.value, 10)
+    );
+    setValue('tagIds', selectedIds);
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <label htmlFor="fullName">Full Name</label>
+        <label htmlFor="full_name">Full Name</label>
         <input
-          id="fullName"
-          {...register('fullName')}
-          defaultValue={fullName}
+          id="full_name"
+          {...register('full_name')}
+          defaultValue={full_name}
         />
-        {errors.fullName && <p>{errors.fullName.message}</p>}
+        {errors.full_name && <p>{errors.full_name.message}</p>}
       </div>
 
       <div>
@@ -107,24 +127,31 @@ const SupportRequestForm = () => {
         <label htmlFor="issueType">Issue Type</label>
         <select id="issueType" {...register('issueType')}>
           <option value="">Select Issue Type</option>
-          <option value="bug">Bug Report</option>
-          <option value="feature">Feature Request</option>
-          <option value="general">General Inquiry</option>
+          <option value="bug_report">Bug Report</option>
+          <option value="feature_request">Feature Request</option>
+          <option value="general_inquiry">General Inquiry</option>
         </select>
         {errors.issueType && <p>{errors.issueType.message}</p>}
       </div>
 
       <div>
-        <label htmlFor="tagId">Tags</label>
-        <select id="tagId" {...register('tagId')}>
-          <option value="">Select a Tag</option>
+        <label htmlFor="tagIds">Tags</label>
+        <select
+          id="tagIds"
+          multiple
+          style={{
+            height: '100px',
+            overflowY: 'scroll',
+          }}
+          onChange={handleTagChange}
+        >
           {tags.map((tag) => (
             <option key={tag.id} value={tag.id}>
               {tag.name}
             </option>
           ))}
         </select>
-        {errors.tagId && <p>{errors.tagId.message}</p>}
+        {errors.tagIds && <p>{errors.tagIds.message}</p>}
       </div>
 
       <div className="steps-container">

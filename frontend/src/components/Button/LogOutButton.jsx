@@ -1,14 +1,12 @@
-// components/LogoutButton.js
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { removeToken } from '../../redux/slices/authSlice';
+import { logout } from '../../redux/slices/authSlice';
 
 const LogoutButton = () => {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    dispatch(removeToken());
-    localStorage.removeItem('token');
+    dispatch(logout());
   };
 
   return (

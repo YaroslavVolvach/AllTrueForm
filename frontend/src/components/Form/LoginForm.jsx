@@ -23,22 +23,28 @@ const LoginForm = () => {
   const onSubmit = async (data) => {
     dispatch(loginStart());
     try {
+      console.log('Attempting login with:', data); // Лог для проверки отправляемых данных
       const response = await axios.post(
         'http://localhost:8000/v1/users/login',
         data
       );
 
-      const { access_token, user } = response.data;
+      const user = response.data;
+      console.log('Login response:', user); // Лог для проверки ответа сервера
+
       dispatch(
         loginSuccess({
-          token: access_token,
-          fullName: user.fullName,
+          token: user.access_token,
+          id: user.id,
+          full_name: user.full_name,
           email: user.email,
         })
       );
 
+      console.log('Redux state updated successfully'); // Лог для подтверждения обновления Redux
       navigate('/');
     } catch (error) {
+      console.error('Login failed:', error.response?.data || error.message); // Лог ошибки
       setLoginError('Invalid email or password');
       dispatch(loginFailure('Invalid email or password'));
     }

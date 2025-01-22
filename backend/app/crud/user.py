@@ -13,6 +13,10 @@ def get_user_by_email(db: Session, email: str) -> schemas.UserResponse:
 
 
 def create_user(db: Session, user: schemas.UserCreate) -> schemas.UserResponse:
+
+    if db.query(User).filter(User.email == user.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
     db_user = User(
         email=user.email,
         hashed_password=hash_password(user.password),

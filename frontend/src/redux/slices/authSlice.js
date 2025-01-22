@@ -2,7 +2,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   user: {
-    fullName: localStorage.getItem('fullName') || null,
+    id: localStorage.getItem('user_id') || null,
+    full_name: localStorage.getItem('full_name') || null,
     email: localStorage.getItem('email') || null,
   },
   token: localStorage.getItem('token') || null,
@@ -29,15 +30,17 @@ const authSlice = createSlice({
       state.errorMessage = '';
     },
     loginSuccess: (state, action) => {
-      const { token, fullName, email } = action.payload;
+      const { token, id, full_name, email } = action.payload;
 
       state.isLoading = false;
       state.token = token;
-      state.user.fullName = fullName;
+      state.user.id = id;
+      state.user.full_name = full_name;
       state.user.email = email;
 
       saveToLocalStorage('token', token);
-      saveToLocalStorage('fullName', fullName);
+      saveToLocalStorage('user_id', id);
+      saveToLocalStorage('full_name', full_name);
       saveToLocalStorage('email', email);
     },
     loginFailure: (state, action) => {
@@ -46,7 +49,8 @@ const authSlice = createSlice({
       state.errorMessage = action.payload;
     },
     logout: (state) => {
-      state.user.fullName = null;
+      state.user.id = null;
+      state.user.full_name = null;
       state.user.email = null;
       state.token = null;
       state.isLoading = false;
@@ -54,7 +58,8 @@ const authSlice = createSlice({
       state.errorMessage = '';
 
       removeFromLocalStorage('token');
-      removeFromLocalStorage('fullName');
+      removeFromLocalStorage('user_id');
+      removeFromLocalStorage('full_name');
       removeFromLocalStorage('email');
     },
     setToken: (state, action) => {

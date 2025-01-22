@@ -27,9 +27,14 @@ const Navbar = () => {
             </Link>
           </>
         ) : (
-          <button className="navbar-button" onClick={handleLogout}>
-            Logout
-          </button>
+          <>
+            <Link to="/confirmations" className="navbar-button">
+              Confirmations
+            </Link>
+            <button className="navbar-button" onClick={handleLogout}>
+              Logout
+            </button>
+          </>
         )}
       </div>
     </nav>

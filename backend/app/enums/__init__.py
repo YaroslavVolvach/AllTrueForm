@@ -10,7 +10,7 @@ class RequestStatus(PyEnum):
     resolved = "resolved"
     closed = "closed"
 
-class IssueType(PyEnum):
-    bugReport = "bugReport"
-    featureRequest = "featureRequest"
-    generalInquiry = "generalInquiry"
+class IssueType(str, PyEnum):
+    bug = "bug_report"
+    feature = "feature_request"
+    general = "general_inquiry"

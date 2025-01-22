@@ -2,28 +2,27 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app import crud, schemas
 from app.db.session import get_db
-from app.core.security import create_access_token, verify_password
+from app.core.security import create_access_token, verify_password, hash_password
 from app.enums import Role
 from app.dependencies import role_required
+from app.models import User
 
 router = APIRouter()
 
 @router.post("/registration", response_model=schemas.UserResponse)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_user(db=db, user=user)
 
 
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login", response_model=schemas.UserResponse)
 def login_user(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
+    db_user = db.query(User).filter(User.email == user.email).first()
+
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Incorrect email or password")
 
-    access_token = create_access_token(data={"sub": db_user.id, "role": db_user.role.value})
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token(data={"sub": str(db_user.id), "role": db_user.role.value})
+    return schemas.UserResponse(id=db_user.id, full_name=db_user.full_name, email=db_user.email, role=db_user.role, access_token=access_token, token_type="Bearer")
 
 
 @router.get("/me", response_model=schemas.UserResponse)

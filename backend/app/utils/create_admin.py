@@ -3,6 +3,10 @@ from app.db.session import SessionLocal
 from app.models.user import User
 from app.core.security import hash_password
 from app.enums import Role
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 def create_admin():
     db: Session = SessionLocal()
@@ -12,9 +16,18 @@ def create_admin():
         print("Admin already exists")
         return
 
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    admin_full_name = os.getenv("ADMIN_FULL_NAME", "Default Admin")  
+
+    if not admin_email or not admin_password:
+        print("Error: ADMIN_EMAIL or ADMIN_PASSWORD is not set in .env")
+        return
+
     admin = User(
-        email="admin@example.com", 
-        hashed_password=hash_password("adminpassword"),
+        email=admin_email,
+        hashed_password=hash_password(admin_password),
+        full_name=admin_full_name,  
         role=Role.admin
     )
 

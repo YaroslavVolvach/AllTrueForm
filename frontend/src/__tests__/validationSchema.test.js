@@ -1,25 +1,24 @@
 import { supportRequestSchema } from '../components/Form/validationSchema';
 
-describe('Validation Schema', () => {
-  test('validates that fullName is required', () => {
+describe('Support Request Schema Validation', () => {
+  test('validates that full_name is required', () => {
     const result = supportRequestSchema.safeParse({
-      fullName: '',
-      email: 'test@example.com',
-      issueType: 'bug',
-      tags: ['UI'],
+      email: 'user@example.com',
+      issueType: 'bug_report',
+      tagIds: [1],
       steps: ['Step 1'],
     });
 
     expect(result.success).toBe(false);
-    expect(result.error.issues[0].message).toBe('Full Name is required');
+    expect(result.error.issues[0].message).toBe('Required');
   });
 
   test('validates that email must be valid', () => {
     const result = supportRequestSchema.safeParse({
-      fullName: 'John Doe',
+      full_name: 'John Doe',
       email: 'invalid-email',
-      issueType: 'bug',
-      tags: ['UI'],
+      issueType: 'bug_report',
+      tagIds: [1],
       steps: ['Step 1'],
     });
 
@@ -27,31 +26,30 @@ describe('Validation Schema', () => {
     expect(result.error.issues[0].message).toBe('Invalid email address');
   });
 
-  test('validates successful input', () => {
+  test('validates that at least one tag is selected', () => {
     const result = supportRequestSchema.safeParse({
-      fullName: 'John Doe',
-      email: 'john.doe@example.com',
-      issueType: 'bug',
-      tags: ['UI', 'Performance'],
+      full_name: 'John Doe',
+      email: 'user@example.com',
+      issueType: 'bug_report',
+      tagIds: [],
       steps: ['Step 1'],
     });
 
-    expect(result.success).toBe(true);
-  });
-
-  test('validates that at least one step is required', () => {
-    const result = supportRequestSchema.safeParse({
-      fullName: 'John Doe',
-      email: 'john.doe@example.com',
-      issueType: 'bug',
-      tags: ['UI'],
-      steps: [],
-    });
-
-    console.log(result);
     expect(result.success).toBe(false);
     expect(result.error.issues[0].message).toBe(
-      'At least one step is required'
+      'Please select at least one tag'
     );
+  });
+
+  test('validates successful input', () => {
+    const result = supportRequestSchema.safeParse({
+      full_name: 'John Doe',
+      email: 'user@example.com',
+      issueType: 'bug_report',
+      tagIds: [1, 2],
+      steps: ['Step 1', 'Step 2'],
+    });
+
+    expect(result.success).toBe(true);
   });
 });

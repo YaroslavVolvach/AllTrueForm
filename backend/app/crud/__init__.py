@@ -8,3 +8,13 @@ from .user import (
     update_user_password,
     get_current_user
 )
+
+from .confirmation import (
+    create_confirmation,
+    get_confirmations,
+    get_confirmation_by_id,
+    update_confirmation,
+    delete_confirmation,
+    get_confirmations_by_user
+
+)
