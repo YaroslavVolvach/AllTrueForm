@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import '../../styles/registration.css';
 
 const RegistrationForm = () => {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await axios.post('http://localhost:8000/v1/users/registration', {
+        fullName,
         email,
         password,
       });
-      setSuccessMessage('Registration successful!');
-      setEmail('');
-      setPassword('');
+      navigate('/login');
     } catch (err) {
       setError('Failed to register user');
     }
@@ -27,8 +28,16 @@ const RegistrationForm = () => {
     <div>
       <h2>Register</h2>
       {error && <div style={{ color: 'red' }}>{error}</div>}
-      {successMessage && <div style={{ color: 'green' }}>{successMessage}</div>}
       <form onSubmit={handleSubmit}>
+        <div>
+          <label>Full Name</label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+          />
+        </div>
         <div>
           <label>Email</label>
           <input

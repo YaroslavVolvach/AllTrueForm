@@ -13,6 +13,12 @@ import '../../styles/form.css';
 const SupportRequestForm = () => {
   const [tags, setTags] = useState([]);
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const token = useSelector((state) => state.auth.token);
+  const fullName = useSelector((state) => state.auth.user.fullName);
+  const email = useSelector((state) => state.auth.user.email);
+
   const {
     register,
     handleSubmit,
@@ -22,8 +28,8 @@ const SupportRequestForm = () => {
   } = useForm({
     resolver: zodResolver(supportRequestSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
+      fullName: fullName || '',
+      email: email || '',
       issueType: '',
       tagId: '',
       steps: [''],
@@ -34,10 +40,6 @@ const SupportRequestForm = () => {
     control,
     name: 'steps',
   });
-
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -82,13 +84,22 @@ const SupportRequestForm = () => {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div>
         <label htmlFor="fullName">Full Name</label>
-        <input id="fullName" {...register('fullName')} />
+        <input
+          id="fullName"
+          {...register('fullName')}
+          defaultValue={fullName}
+        />
         {errors.fullName && <p>{errors.fullName.message}</p>}
       </div>
 
       <div>
         <label htmlFor="email">Email Address</label>
-        <input id="email" type="email" {...register('email')} />
+        <input
+          id="email"
+          type="email"
+          {...register('email')}
+          defaultValue={email}
+        />
         {errors.email && <p>{errors.email.message}</p>}
       </div>
 

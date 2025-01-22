@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
-import { setToken } from '../../redux/slices/authSlice';
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+} from '../../redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/login.css';
 
@@ -17,18 +21,26 @@ const LoginForm = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
+    dispatch(loginStart());
     try {
       const response = await axios.post(
         'http://localhost:8000/v1/users/login',
         data
       );
 
-      localStorage.setItem('token', response.data.access_token);
-      dispatch(setToken(response.data.access_token));
+      const { access_token, user } = response.data;
+      dispatch(
+        loginSuccess({
+          token: access_token,
+          fullName: user.fullName,
+          email: user.email,
+        })
+      );
 
       navigate('/');
     } catch (error) {
       setLoginError('Invalid email or password');
+      dispatch(loginFailure('Invalid email or password'));
     }
   };
 
